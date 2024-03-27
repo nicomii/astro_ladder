@@ -25,9 +25,6 @@ matplotlib.rcParams['savefig.dpi']= 300
 
 import warnings
 warnings.filterwarnings('ignore')
-
-def sweet(x):
-    return np.sqrt(x)
     
 ddir_stars = 'C:/Users/enidh/OneDrive/2024/PHYS3080/DL Project/universe_8/' # point this to where you unzip your data!
 
@@ -102,8 +99,17 @@ variable_colour = v2-v0
 abs_mag_v = v1 + 2*np.log10(1./variables_1.Parallax)
 
 variables_1['AbsMag']=abs_mag_v
+fig=plt.figure()
+plt.plot(variables_1.Period,variables_1.AbsMag,'.',color='C2')
+plt.title("Magnitude-Period relation")
+plt.xlabel('Period (h)')
+plt.ylabel('Absolute Magnitude in G band (mag)')
+
 variableslong=variables_1.query('Period > 45')
+variableslong=variableslong.reset_index()
+
 variablesshort=variables_1.query('Period > 10 and Period < 30')
+variablesshort=variablesshort.reset_index()
 
 periodlarr=np.array(variableslong.Period)
 luminlarr=np.array(variableslong.AbsMag)
@@ -113,6 +119,14 @@ reconstructed2 = C @ d
 grad2=(reconstructed2[len(reconstructed2)-1]-reconstructed2[0])/(periodlarr[len(periodlarr)-1]-periodlarr[0])
 int2=reconstructed2[0]-grad2*periodlarr[0]
 
+fig=plt.figure()
+plt.plot(variableslong.Period,variableslong.AbsMag,'.',color='C2')
+plt.plot(variableslong.Period,grad2*variableslong.Period+int2)
+plt.title("Magnitude-Period relation for long period")
+plt.xlabel('Period (h)')
+plt.ylabel('Absolute Magnitude in G band (mag)')
+print("Long Gradient:", grad2, "Long Intercept:", int2)
+
 periodsarr=np.array(variablesshort.Period)
 luminsarr=np.array(variablesshort.AbsMag)
 A = np.vander(periodsarr,2) # the Vandermonde matrix of order N is the matrix of polynomials of an input vector 1, x, x**2, etc
@@ -120,6 +134,14 @@ b, residuals, rank, s = np.linalg.lstsq(A,luminsarr)
 reconstructed1 = A @ b
 grad1=(reconstructed1[len(reconstructed1)-1]-reconstructed1[0])/(periodsarr[len(periodsarr)-1]-periodsarr[0])
 int1=reconstructed1[0]-grad1*periodsarr[0]
+
+fig=plt.figure()
+plt.plot(variablesshort.Period,variablesshort.AbsMag,'.',color='C2')
+plt.plot(variablesshort.Period,grad1*variablesshort.Period+int1)
+plt.title("Magnitude-Period relation for short period")
+plt.xlabel('Period (h)')
+plt.ylabel('Absolute Magnitude in G band (mag)')
+print("Short Gradient:", grad1, "Short Intercept:", int1)
 
 variable_all=all_stars[all_stars.Name.isin(variables.Name)]
 variable_all=variable_all.reset_index()
@@ -133,45 +155,44 @@ newvariablesshort=newvariablesshort1.drop(newvariablesshort1[newvariablesshort1.
 newvariableslong['AbsMag']=newvariableslong.Period*grad2+int2
 newvariablesshort['AbsMag']=newvariablesshort.Period*grad1+int1
 
-newvariableslong['Luminosity']=3*pow(10,28)*pow(10,newvariableslong.AbsMag/-2.5)
-newvariablesshort['Luminosity']=3*pow(10,28)*pow(10,newvariablesshort.AbsMag/-2.5)
-
 newvariableslong.RadialVelocity=-(newvariableslong.RadialVelocity)
 newvariablesshort.RadialVelocity=-(newvariablesshort.RadialVelocity)
 
-newvariableslong['Distance']=pow(newvariableslong.Luminosity/(4*math.pi*newvariableslong.TotalF),0.5)/(3*pow(10,23))
-newvariablesshort['Distance']=pow(newvariablesshort.Luminosity/(4*math.pi*newvariablesshort.TotalF),0.5)/(3*pow(10,23))
+newvariablesshort['Distance']=pow(10,(newvariablesshort.AbsMag-np.log10(newvariablesshort.GreenF))/2)/1000
+newvariableslong['Distance']=pow(10,(newvariableslong.AbsMag-np.log10(newvariableslong.GreenF))/2)/1000
 newvariablesshort=newvariablesshort.drop(newvariablesshort[newvariablesshort.Distance > 8].index)
 newvariablesshort=newvariablesshort.drop(newvariablesshort[(newvariablesshort.Distance > 2) &(newvariablesshort.RadialVelocity > 5)].index)
 newvariableslong=newvariableslong.reset_index()
 newvariablesshort=newvariablesshort.reset_index()
+newvariablesshort.to_csv('Short Variables.csv')
+newvariableslong.to_csv('Long Variables.csv')
 
-shortdist=np.array(newvariablesshort.Distance.astype(float))
-shortvelo=np.array(newvariablesshort.RadialVelocity.astype(float))
-q = np.vander(shortdist,2) # the Vandermonde matrix of order N is the matrix of polynomials of an input vector 1, x, x**2, etc
-p, residuals, rank, s = np.linalg.lstsq(q,shortvelo)
-reconstructedq = q @ p
-gradq=(reconstructedq[len(reconstructedq)-1]-reconstructedq[0])/(shortdist[len(shortdist)-1]-shortdist[0])
-intq=reconstructedq[0]-gradq*shortdist[0]
+#shortdist=np.array(newvariablesshort.Distance.astype(float))
+#shortvelo=np.array(newvariablesshort.RadialVelocity.astype(float))
+#q = np.vander(shortdist,2) # the Vandermonde matrix of order N is the matrix of polynomials of an input vector 1, x, x**2, etc
+#p, residuals, rank, s = np.linalg.lstsq(q,shortvelo)
+#reconstructedq = q @ p
+#gradq=(reconstructedq[len(reconstructedq)-1]-reconstructedq[0])/(shortdist[len(shortdist)-1]-shortdist[0])
+#intq=reconstructedq[0]-gradq*shortdist[0]
 
-fig=plt.figure()
-plt.plot(newvariablesshort.Distance,newvariablesshort.RadialVelocity,'.',color='C2')
-plt.xlabel('Distance (Mpc)')
-plt.ylabel('Radial Velocity (km/sec)')
-plt.plot(shortdist,reconstructedq)
-print("Short grad",round(gradq,2),"Short int", round(intq,2))
+#fig=plt.figure()
+#plt.plot(newvariablesshort.Distance,newvariablesshort.RadialVelocity,'.',color='C2')
+#plt.xlabel('Distance (Mpc)')
+#plt.ylabel('Radial Velocity (km/sec)')
+#plt.plot(shortdist,reconstructedq)
+#print("Short grad",round(gradq,2),"Short int", round(intq,2))
 
-longdist=np.array(newvariableslong.Distance.astype(float))
-longvelo=np.array(newvariableslong.RadialVelocity.astype(float))
-m = np.vander(longdist,2) # the Vandermonde matrix of order N is the matrix of polynomials of an input vector 1, x, x**2, etc
-n, residuals, rank, s = np.linalg.lstsq(m,longvelo)
-reconstructedm = m @ n
-gradm=(reconstructedm[len(reconstructedm)-1]-reconstructedm[0])/(longdist[len(longdist)-1]-longdist[0])
-intm=reconstructedm[0]-gradm*longdist[0]
+#longdist=np.array(newvariableslong.Distance.astype(float))
+#longvelo=np.array(newvariableslong.RadialVelocity.astype(float))
+#m = np.vander(longdist,2) # the Vandermonde matrix of order N is the matrix of polynomials of an input vector 1, x, x**2, etc
+#n, residuals, rank, s = np.linalg.lstsq(m,longvelo)
+#reconstructedm = m @ n
+#gradm=(reconstructedm[len(reconstructedm)-1]-reconstructedm[0])/(longdist[len(longdist)-1]-longdist[0])
+#intm=reconstructedm[0]-gradm*longdist[0]
 
-fig=plt.figure()
-plt.plot(newvariableslong.Distance,newvariableslong.RadialVelocity,'.',color='C2')
-plt.xlabel('Distance (Mpc)')
-plt.ylabel('Radial Velocity (km/sec)')
-plt.plot(longdist,reconstructedm)
-print("Long grad",round(gradm,2),"Long int", round(intm,2))
+#fig=plt.figure()
+#plt.plot(newvariableslong.Distance,newvariableslong.RadialVelocity,'.',color='C2')
+#plt.xlabel('Distance (Mpc)')
+#plt.ylabel('Radial Velocity (km/sec)')
+#plt.plot(longdist,reconstructedm)
+#print("Long grad",round(gradm,2),"Long int", round(intm,2))
