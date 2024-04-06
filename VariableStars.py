@@ -13,7 +13,7 @@ import pandas as pd # pandas is a popular library in industry for manipulating l
 from astropy.timeseries import LombScargle
 
 # configure notebook for plotting
-%matplotlib inline
+#matplotlib inline
 
 mpl.style.use('seaborn-colorblind') # colourblind-friendly colour scheme
 
