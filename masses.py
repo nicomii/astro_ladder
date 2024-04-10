@@ -40,12 +40,15 @@ m=b[0]
 reconstructed = A @ b # @ is shorthand for matrix multiplication in python
 grad=(reconstructed[len(reconstructed)-1]-reconstructed[0])/(DistantGalaxies.Mass[len(DistantGalaxies.Mass)-1]-DistantGalaxies.Mass[0])
 inter=reconstructed[0]-grad*DistantGalaxies.Mass[0]
+print("Mass Radius")
+print("Grad:", grad)
+print("Inter:", inter)
 
 fig=plt.figure()
-plt.plot(DistantGalaxies['Mass'].astype(float),DistantGalaxies['Radius'].astype(float),'.')
-plt.plot(DistantGalaxies['Mass'].astype(float),reconstructed)
-plt.ylabel('Radius (m)')
-plt.xlabel('Mass (kg)')
+plt.plot(np.log10(DistantGalaxies['Mass'].astype(float)),np.log10(DistantGalaxies['Radius'].astype(float)),'.')
+#plt.plot(np.log10(DistantGalaxies['Mass'].astype(float)),np.log10(reconstructed))
+plt.ylabel('Log10 of Radius (kpc)')
+plt.xlabel('Log10 of Mass (kg)')
 plt.title('Mass vs Radius of Galaxies')
 
 A = np.vander(DistantGalaxies['Mass'].astype(float),2) 
@@ -56,12 +59,15 @@ m=b[0]
 reconstructed = A @ b # @ is shorthand for matrix multiplication in python
 grad=(reconstructed[len(reconstructed)-1]-reconstructed[0])/(DistantGalaxies.Mass[len(DistantGalaxies.Mass)-1]-DistantGalaxies.Mass[0])
 inter=reconstructed[0]-grad*DistantGalaxies.Mass[0]
+print("Mass Velocity")
+print("Grad:", grad)
+print("Inter:", inter)
 
 fig=plt.figure()
-plt.plot(DistantGalaxies['Mass'].astype(float),DistantGalaxies['RadialVelocity'].astype(float),'.')
-plt.plot(DistantGalaxies['Mass'].astype(float),reconstructed)
-plt.ylabel('Radial Velocity (km/sec-squared)')
-plt.xlabel('Mass (kg)')
+plt.plot(np.log10(DistantGalaxies['Mass'].astype(float)),np.log10(abs(DistantGalaxies['RadialVelocity'].astype(float))),'.')
+#plt.plot(np.log10(DistantGalaxies['Mass'].astype(float)),np.log10(abs(reconstructed)))
+plt.ylabel('Log10 of Radial Velocity (km/sec)')
+plt.xlabel('Log10 of Mass (kg)')
 plt.title('Mass vs Radial Velocity of Galaxies')
 
 A = np.vander(DistantGalaxies['Luminosity'].astype(float),2) 
@@ -72,10 +78,13 @@ m=b[0]
 reconstructed = A @ b # @ is shorthand for matrix multiplication in python
 grad=(reconstructed[len(reconstructed)-1]-reconstructed[0])/(DistantGalaxies.Luminosity[len(DistantGalaxies.Luminosity)-1]-DistantGalaxies.Luminosity[0])
 inter=reconstructed[0]-grad*DistantGalaxies.Luminosity[0]
+print("Mass Luminosity")
+print("Grad:", grad)
+print("Inter:", inter)
 
 fig=plt.figure()
-plt.plot(DistantGalaxies['Luminosity'].astype(float),DistantGalaxies['Mass'].astype(float),'.')
-plt.plot(DistantGalaxies['Luminosity'].astype(float),reconstructed)
-plt.xlabel('Luminosity (W/nm)')
-plt.ylabel('Mass (kg)')
+plt.plot(np.log10(DistantGalaxies['Luminosity'].astype(float)),np.log10(DistantGalaxies['Mass'].astype(float)),'.')
+#plt.plot(DistantGalaxies['Luminosity'].astype(float),reconstructed)
+plt.xlabel('Log 10 of V-band Luminosity (W/nm)')
+plt.ylabel('Log 10 of Mass (kg)')
 plt.title('Luminosity vs Mass of Galaxies')
